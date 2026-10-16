@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Movie Booking — Spring Demo</title>
+<style>
+  :root {
+    --bg: #f5f2f3; --card: #ffffff; --ink: #292528; --muted: #777176;
+    --line: #e6dfe2; --accent: #941c43; --accent-ink: #ffffff; --out: #f8f6f7;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+         background: var(--bg); color: var(--ink); line-height: 1.45; }
+  header { padding: 22px 16px 4px; max-width: 1000px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 1.25rem; }
+  header p { margin: 3px 0 0; color: var(--muted); font-size: .82rem; }
+  main { max-width: 1000px; margin: 0 auto; padding: 12px 16px 24px;
+         display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+  .tag { font-size: .62rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+         color: var(--accent); }
+  .card h2 { margin: 2px 0 4px; font-size: .95rem; }
+  .card p.hint { margin: 0 0 10px; color: var(--muted); font-size: .75rem; }
+  label { display: block; font-size: .72rem; margin: 7px 0 3px; }
+  input { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px; font: inherit; font-size: .82rem; }
+  button { margin-top: 9px; padding: 6px 10px; border: 0; border-radius: 5px;
+           background: var(--accent); color: var(--accent-ink); font: inherit; font-size: .78rem; font-weight: 650; cursor: pointer; }
+  button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  button:focus-visible, input:focus-visible { outline: 2px solid #ca7893; outline-offset: 2px; }
+  pre { background: var(--out); border: 1px solid var(--line); border-radius: 5px; padding: 8px;
+        margin: 9px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .68rem; min-height: 28px; }
+  .wide { grid-column: 1 / -1; }
+  table { width: 100%; border-collapse: collapse; font-size: .72rem; margin-top: 8px; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 650; }
+  @media (max-width: 620px) {
+    main { grid-template-columns: 1fr; }
+    .wide { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Movie Booking — Spring Demo</h1>
+  <p>Every object below is created and wired by the Spring IoC container. The page only talks to it.</p>
+</header>
+
+<main>
+  <section class="card">
+    <div class="tag">Bean lifecycle</div>
+    <h2>Show Timer</h2>
+    <p class="hint">Status shows SHOW RUNNING because Spring called <code>startShow()</code> at startup.</p>
+    <label for="tickets">Tickets to sell</label>
+    <input id="tickets" type="number" value="2" min="1" step="1">
+    <button onclick="sellTickets()">Sell tickets</button>
+    <button class="secondary" onclick="showTimerStatus()">Check status</button>
+    <pre id="timerOut"></pre>
+  </section>
+
+  <section class="card">
+    <div class="tag">Constructor injection</div>
+    <h2>Movie Rating</h2>
+    <p class="hint">MovieInfoService gets RatingProvider through its constructor.</p>
+    <label for="movieRating">Movie (Avengers, 3 Idiots, Jawan, Kalki)</label>
+    <input id="movieRating" value="Avengers">
+    <button onclick="getRating()">Get rating</button>
+    <pre id="ratingOut"></pre>
+  </section>
+
+  <section class="card">
+    <div class="tag">Inversion of control</div>
+    <h2>Book a Ticket</h2>
+    <p class="hint">BookingManager uses UserService + SeatService, all made by Spring.</p>
+    <label for="name">Your name</label>
+    <input id="name" value="Priya">
+    <label for="movie">Movie</label>
+    <input id="movie" value="Avengers">
+    <label for="seat">Seat (e.g. A1, B5)</label>
+    <input id="seat" value="A1">
+    <button onclick="bookTicket()">Book ticket</button>
+    <pre id="bookingOut"></pre>
+  </section>
+
+  <section class="card wide">
+    <div class="tag">Proof of IoC</div>
+    <h2>Beans inside the Spring container</h2>
+    <p class="hint">Click twice — the object IDs stay the same, because Spring keeps one shared object (singleton) per bean.</p>
+    <button onclick="loadBeans()">Show beans</button>
+    <table id="beansTable">
+      <thead><tr><th>Bean name</th><th>Class</th><th>Object ID</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  async function call(method, url) {
+    const res = await fetch(url, { method });
+    if (!res.ok) {
+      const detail = await res.text();
+      throw new Error(detail || "Server error " + res.status);
+    }
+    return res.json();
+  }
+  function show(id, text) { document.getElementById(id).textContent = text; }
+  function val(id) { return encodeURIComponent(document.getElementById(id).value.trim()); }
+
+  async function showTimerStatus() {
+    try {
+      const d = await call("GET", "/api/timer/status");
+      show("timerOut", "Status: " + d.status + "\nSold now: " + d.soldNow +
+        "\nTotal tickets sold: " + d.totalTicketsSold);
+    } catch (e) { show("timerOut", e.message); }
+  }
+  async function sellTickets() {
+    try {
+      const d = await call("POST", "/api/timer/sell?tickets=" + val("tickets"));
+      show("timerOut", "Status: " + d.status + "\nSold now: " + d.soldNow +
+        "\nTotal tickets sold: " + d.totalTicketsSold);
+    } catch (e) { show("timerOut", e.message); }
+  }
+  async function getRating() {
+    try {
+      const d = await call("GET", "/api/movies/rating?movie=" + val("movieRating"));
+      show("ratingOut", d.rating);
+    } catch (e) { show("ratingOut", e.message); }
+  }
+  async function bookTicket() {
+    try {
+      const url = "/api/bookings?name=" + val("name") + "&movie=" + val("movie") +
+        "&seat=" + val("seat");
+      const d = await call("POST", url);
+      show("bookingOut", d.steps.join("\n") + "\n\nAll booked seats:\n" +
+        d.allBookedSeats.join("\n"));
+    } catch (e) { show("bookingOut", e.message); }
+  }
+  async function loadBeans() {
+    try {
+      const rows = await call("GET", "/api/beans");
+      const body = document.querySelector("#beansTable tbody");
+      body.textContent = "";
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        [r.name, r["class"], r.objectId].forEach(v => {
+          const td = document.createElement("td");
+          td.textContent = v;
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    } catch (e) { alert(e.message); }
+  }
+
+  showTimerStatus();
+</script>
+</body>
+</html>
