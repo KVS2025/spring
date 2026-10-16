@@ -1,24 +1,31 @@
-# Movie Booking — Spring Demo
+# 🎬 Movie Booking — Spring Boot Demo
 
-A small Spring Boot web app for exploring dependency injection, inversion of control (IoC), bean lifecycle callbacks, and singleton beans. Its browser dashboard lets you check a movie-show timer, look up sample movie ratings, book seats, and inspect the Spring-managed beans.
+> 🍿 A hands-on web app for exploring Spring IoC, dependency injection, and bean lifecycles — with a movie-themed dashboard to bring the concepts to life.
 
-## Features
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7.18-6DB33F?logo=springboot&logoColor=white)
+![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?logo=openjdk&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-3.6%2B-C71A36?logo=apachemaven&logoColor=white)
+![REST API](https://img.shields.io/badge/API-REST-4A90E2?logo=fastapi&logoColor=white)
 
-- **Bean lifecycle:** Spring starts the show when the `ShowTimer` bean is created and stops it when the application shuts down.
-- **Constructor injection:** `MovieInfoService` receives its `RatingProvider`; `BookingManager` receives `UserService` and `SeatService`.
-- **IoC and singleton scope:** The `/api/beans` endpoint displays selected beans and their object IDs so you can compare them across requests.
-- **Movie ratings:** Sample ratings are available for Avengers, 3 Idiots, Jawan, and Kalki.
-- **Seat booking:** Book seats and see the seats booked during the current application run.
-- **Browser dashboard:** A responsive page is served from `/` and calls the JSON API.
+The browser dashboard lets you check a movie-show timer, look up sample movie ratings, book seats, and inspect the Spring-managed beans.
 
-## Requirements
+## ✨ Features
+
+- 🎞️ **Bean lifecycle:** Spring starts the show when the `ShowTimer` bean is created and stops it when the application shuts down.
+- 💉 **Constructor injection:** `MovieInfoService` receives its `RatingProvider`; `BookingManager` receives `UserService` and `SeatService`.
+- 🧩 **IoC and singleton scope:** The `/api/beans` endpoint displays selected beans and their object IDs so you can compare them across requests.
+- ⭐ **Movie ratings:** Sample ratings are available for Avengers, 3 Idiots, Jawan, and Kalki.
+- 🎟️ **Seat booking:** Book seats and see the seats booked during the current application run.
+- 🖥️ **Browser dashboard:** A responsive page is served from `/` and calls the JSON API.
+
+## 🛠️ Requirements
 
 - Java 11 or later
 - Maven 3.6 or later
 
 The project uses Spring Boot 2.7.18 and the Spring Web starter. It does not require a database or additional services.
 
-## Run the application
+## 🚀 Run the application
 
 From the repository root, enter the project directory:
 
@@ -41,7 +48,7 @@ java -jar target/spring-lab7-web-1.0.jar
 
 Open [http://localhost:8080](http://localhost:8080) to use the dashboard. The server listens on port `8080` by default; change `server.port` in `src/main/resources/application.properties` to use another port.
 
-## API
+## 🔌 API
 
 All endpoints return JSON and are available under `/api`.
 
@@ -61,7 +68,7 @@ For example, once the app is running, these URLs can be opened in a browser:
 
 The booking endpoint is a `POST` and accepts its parameters as query parameters. A seat cannot be booked twice for the same movie; a duplicate booking returns HTTP `409 Conflict`. Missing text parameters or an invalid ticket count return HTTP `400 Bad Request`.
 
-## Project layout
+## 📁 Project layout
 
 ```text
 src/main/java/com/example/
@@ -77,6 +84,6 @@ src/main/resources/
 └── static/index.html   # Browser dashboard
 ```
 
-## Notes
+## 📝 Notes
 
 This is an educational demo, not a production booking system. Ratings, ticket counts, and booked seats are held in memory and reset when the application restarts. There is no database, authentication, or payment processing.
